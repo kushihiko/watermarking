@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+ <head>
+  <title></title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <meta name='ocr-system' content='tesseract 5.5.0' />
+  <meta name='ocr-capabilities' content='ocr_page ocr_carea ocr_par ocr_line ocrx_word ocrp_dir ocrp_lang ocrp_wconf'/>
+ </head>
+ <body>
+  <div class='ocr_page' id='page_1' title='image "1.png"; bbox 0 0 1942 224; ppageno 0; scan_res 144 144'>
+   <div class='ocr_carea' id='block_1_1' title="bbox 28 33 1922 198">
+    <p class='ocr_par' id='par_1_1' lang='rus' title="bbox 28 33 1922 198">
+     <span class='ocr_line' id='line_1_1' title="bbox 28 33 1883 60; baseline 0 -5; x_size 27; x_descenders 5; x_ascenders 6">
+      <span class='ocrx_word' id='word_1_1' title='bbox 28 35 61 55; x_wconf 96'>Ты</span>
+      <span class='ocrx_word' id='word_1_2' title='bbox 72 39 182 55; x_wconf 96'>ставишь</span>
+      <span class='ocrx_word' id='word_1_3' title='bbox 192 39 354 60; x_wconf 96'>интересную</span>
+      <span class='ocrx_word' id='word_1_4' title='bbox 364 39 460 60; x_wconf 96'>задачу,</span>
+      <span class='ocrx_word' id='word_1_5' title='bbox 471 33 584 60; x_wconf 96'>близкую</span>
+      <span class='ocrx_word' id='word_1_6' title='bbox 594 40 607 55; x_wconf 96'>к</span>
+      <span class='ocrx_word' id='word_1_7' title='bbox 616 33 742 60; x_wconf 96'>обратной</span>
+      <span class='ocrx_word' id='word_1_8' title='bbox 753 39 844 59; x_wconf 93'>задачи</span>
+      <span class='ocrx_word' id='word_1_9' title='bbox 855 34 919 55; x_wconf 93' lang='eng'>OCR:</span>
+      <span class='ocrx_word' id='word_1_10' title='bbox 930 39 999 55; x_wconf 93'>взять</span>
+      <span class='ocrx_word' id='word_1_11' title='bbox 1010 33 1202 60; x_wconf 92'>распознанный</span>
+      <span class='ocrx_word' id='word_1_12' title='bbox 1212 39 1283 55; x_wconf 96'>текст</span>
+      <span class='ocrx_word' id='word_1_13' title='bbox 1293 39 1321 55; x_wconf 96'>из</span>
+      <span class='ocrx_word' id='word_1_14' title='bbox 1332 33 1517 60; x_wconf 96'>изображения,</span>
+      <span class='ocrx_word' id='word_1_15' title='bbox 1529 39 1559 55; x_wconf 96' lang='eng'>HO</span>
+      <span class='ocrx_word' id='word_1_16' title='bbox 1569 39 1599 55; x_wconf 96'>не</span>
+      <span class='ocrx_word' id='word_1_17' title='bbox 1608 39 1697 55; x_wconf 96'>только</span>
+      <span class='ocrx_word' id='word_1_18' title='bbox 1707 39 1750 55; x_wconf 96'>как</span>
+      <span class='ocrx_word' id='word_1_19' title='bbox 1759 39 1830 55; x_wconf 93'>текст</span>
+      <span class='ocrx_word' id='word_1_20' title='bbox 1839 45 1862 48; x_wconf 92' lang='eng'>—</span>
+      <span class='ocrx_word' id='word_1_21' title='bbox 1871 39 1883 55; x_wconf 96'>а</span>
+     </span>
+     <span class='ocr_line' id='line_1_2' title="bbox 29 80 1922 106; baseline 0 -5; x_size 25; x_descenders 5; x_ascenders 5">
+      <span class='ocrx_word' id='word_1_22' title='bbox 29 85 71 101; x_wconf 96'>как</span>
+      <span class='ocrx_word' id='word_1_23' title='bbox 81 80 160 106; x_wconf 96'>набор</span>
+      <span class='ocrx_word' id='word_1_24' title='bbox 170 85 299 101; x_wconf 96'>символов</span>
+      <span class='ocrx_word' id='word_1_25' title='bbox 309 85 323 101; x_wconf 95'>с</span>
+      <span class='ocrx_word' id='word_1_26' title='bbox 333 86 362 101; x_wconf 96'>их</span>
+      <span class='ocrx_word' id='word_1_27' title='bbox 372 85 612 106; x_wconf 96'>геометрическими</span>
+      <span class='ocrx_word' id='word_1_28' title='bbox 624 85 816 106; x_wconf 96'>координатами</span>
+      <span class='ocrx_word' id='word_1_29' title='bbox 827 86 840 101; x_wconf 96'>и</span>
+      <span class='ocrx_word' id='word_1_30' title='bbox 851 81 998 106; x_wconf 96'>шрифтами,</span>
+      <span class='ocrx_word' id='word_1_31' title='bbox 1009 80 1088 101; x_wconf 96'>чтобы</span>
+      <span class='ocrx_word' id='word_1_32' title='bbox 1099 85 1178 101; x_wconf 92'>потом</span>
+      <span class='ocrx_word' id='word_1_33' title='bbox 1189 81 1399 106; x_wconf 91'>“перерисовать&quot;</span>
+      <span class='ocrx_word' id='word_1_34' title='bbox 1409 85 1543 106; x_wconf 93'>документ,</span>
+      <span class='ocrx_word' id='word_1_35' title='bbox 1555 85 1686 105; x_wconf 92'>подменив</span>
+      <span class='ocrx_word' id='word_1_36' title='bbox 1696 81 1784 106; x_wconf 96'>шрифт</span>
+      <span class='ocrx_word' id='word_1_37' title='bbox 1793 85 1922 101; x_wconf 96'>символов</span>
+     </span>
+     <span class='ocr_line' id='line_1_3' title="bbox 29 125 1922 152; baseline 0 -5; x_size 27; x_descenders 5; x_ascenders 6">
+      <span class='ocrx_word' id='word_1_38' title='bbox 29 131 57 147; x_wconf 96'>на</span>
+      <span class='ocrx_word' id='word_1_39' title='bbox 68 125 166 152; x_wconf 96'>парный</span>
+      <span class='ocrx_word' id='word_1_40' title='bbox 177 131 272 147; x_wconf 96'>аналог.</span>
+      <span class='ocrx_word' id='word_1_41' title='bbox 283 126 298 147; x_wconf 96'>В</span>
+      <span class='ocrx_word' id='word_1_42' title='bbox 308 126 388 147; x_wconf 96'>твоём</span>
+      <span class='ocrx_word' id='word_1_43' title='bbox 398 131 489 152; x_wconf 92'>случае</span>
+      <span class='ocrx_word' id='word_1_44' title='bbox 498 137 521 140; x_wconf 92'>—</span>
+      <span class='ocrx_word' id='word_1_45' title='bbox 531 131 544 147; x_wconf 96'>с</span>
+      <span class='ocrx_word' id='word_1_46' title='bbox 554 131 732 152; x_wconf 96'>сохранением</span>
+      <span class='ocrx_word' id='word_1_47' title='bbox 743 131 884 152; x_wconf 96'>координат</span>
+      <span class='ocrx_word' id='word_1_48' title='bbox 894 132 907 147; x_wconf 96'>и</span>
+      <span class='ocrx_word' id='word_1_49' title='bbox 918 125 1031 147; x_wconf 96'>заменой</span>
+      <span class='ocrx_word' id='word_1_50' title='bbox 1041 131 1130 147; x_wconf 96'>только</span>
+      <span class='ocrx_word' id='word_1_51' title='bbox 1140 127 1326 152; x_wconf 96'>графического</span>
+      <span class='ocrx_word' id='word_1_52' title='bbox 1337 131 1537 152; x_wconf 96'>представления</span>
+      <span class='ocrx_word' id='word_1_53' title='bbox 1548 126 1614 152; x_wconf 96'>букв.</span>
+      <span class='ocrx_word' id='word_1_54' title='bbox 1625 125 1716 151; x_wconf 96'>Общий</span>
+      <span class='ocrx_word' id='word_1_55' title='bbox 1727 131 1788 147; x_wconf 96'>план</span>
+      <span class='ocrx_word' id='word_1_56' title='bbox 1797 125 1922 151; x_wconf 96'>действий</span>
+     </span>
+     <span class='ocr_line' id='line_1_4' title="bbox 29 172 361 198; baseline 0 -5; x_size 27.92857; x_descenders 5.5; x_ascenders 6.2142859">
+      <span class='ocrx_word' id='word_1_57' title='bbox 29 177 113 193; x_wconf 96'>может</span>
+      <span class='ocrx_word' id='word_1_58' title='bbox 122 172 185 193; x_wconf 96'>быть</span>
+      <span class='ocrx_word' id='word_1_59' title='bbox 194 177 361 198; x_wconf 96'>следующим:</span>
+     </span>
+    </p>
+   </div>
+  </div>
+ </body>
+</html>
