@@ -1,0 +1,9 @@
+pdf_path: "test.pdf"
+pdf_name: "test.pdf"
+tmp_folder: "tmp/"
+output_pattern: "image-%d.png"
+output_folder: "output/"
+font_path: "/System/Library/Fonts/Supplemental/Times New Roman.ttf"
+language: "rus+eng"
+shift: 4
+marker_length: 8
