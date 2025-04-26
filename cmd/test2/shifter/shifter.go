@@ -1,0 +1,138 @@
+package shifter
+
+import (
+	"image"
+	"watermarking/cmd/test2/bitset"
+)
+
+type Shifter struct{}
+
+func (sh *Shifter) Normalize(words []image.Rectangle) {
+	var totalGap int
+	var gapCount int
+	for i := 1; i < len(words); i++ {
+		gap := words[i].Min.X - words[i-1].Max.X
+		if gap > 0 {
+			totalGap += gap
+			gapCount++
+		}
+	}
+
+	avgGap := 0
+	if gapCount > 0 {
+		avgGap = totalGap / gapCount
+	}
+
+	cursorX := words[0].Min.X
+	prevX := words[0].Min.X
+	for _, word := range words {
+		if prevX > word.Min.X {
+			cursorX = word.Min.X
+		}
+
+		dx := word.Dx()
+		word.Min.X = cursorX
+		word.Max.X = cursorX + dx
+
+		cursorX += dx + avgGap
+		prevX = word.Min.X
+	}
+}
+
+func (sh *Shifter) Encrypt(words []image.Rectangle, shift int, bits bitset.BitSet) {
+	cursorX := words[0].Min.X
+	prevX := words[0].Min.X
+
+	bitNumber := 0
+
+	for _, word := range words {
+		if prevX > word.Min.X {
+			cursorX = word.Min.X
+			bitNumber--
+		}
+
+		if bitNumber >= bits.Len() {
+			bitNumber = 0
+		}
+
+		dx := word.Dx()
+		word.Min.X = cursorX
+		word.Max.X = cursorX + dx
+
+		if bits.Get(bitNumber) {
+			cursorX += shift
+		}
+
+		cursorX += dx
+		prevX = word.Min.X
+	}
+}
+
+// Generated
+func (sh *Shifter) Decrypt(words []image.Rectangle) (bitset.BitSet, []float64) {
+	if len(words) < 2 {
+		return *bitset.NewBitSet(0), nil
+	}
+
+	var gaps []int
+	for i := 1; i < len(words); i++ {
+		gap := words[i].Min.X - words[i-1].Max.X
+		if gap > 0 {
+			gaps = append(gaps, gap)
+		}
+	}
+
+	if len(gaps) == 0 {
+		return *bitset.NewBitSet(0), nil
+	}
+
+	// Find min and max gaps
+	minGap, maxGap := gaps[0], gaps[0]
+	for _, g := range gaps {
+		if g < minGap {
+			minGap = g
+		}
+		if g > maxGap {
+			maxGap = g
+		}
+	}
+
+	// Assume two clusters: small (0) and large (1)
+	center0 := minGap
+	center1 := maxGap
+
+	bits := bitset.NewBitSet(len(gaps))
+	confidences := make([]float64, len(gaps))
+
+	for i, g := range gaps {
+		diff0 := abs(g - center0)
+		diff1 := abs(g - center1)
+
+		if diff1 < diff0 {
+			bits.Set(i)
+		}
+
+		totalDiff := diff0 + diff1
+		if totalDiff != 0 {
+			confidences[i] = 1.0 - (float64(min(diff0, diff1)) / float64(totalDiff))
+		} else {
+			confidences[i] = 1.0
+		}
+	}
+
+	return *bits, confidences
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

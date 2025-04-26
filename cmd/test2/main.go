@@ -7,7 +7,7 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"image"
-	"image/color"
+	"image/draw"
 	"image/png"
 	"os"
 	"watermarking/cmd/test2/parser"
@@ -89,33 +89,57 @@ func main() {
 		panic(err)
 	}
 
-	//for _, wordsBox := range wordsBoxes {
-	//	psr.Word(wordsBox)
+	// Новый холст для выравненного текста
+	//newDC := gg.NewContext(width, height)
+	//newDC.SetRGB(1, 1, 1)
+	//newDC.Clear()
+	//
+	//// Считаем средний пробел между словами
+	//var totalGap int
+	//var gapCount int
+	//for i := 1; i < len(wordsBoxes); i++ {
+	//	prev := wordsBoxes[i-1].Box
+	//	curr := wordsBoxes[i].Box
+	//	gap := curr.Min.X - prev.Max.X
+	//	if gap > 0 && wordsBoxes[i-1].LineNum == wordsBoxes[i].LineNum {
+	//		totalGap += gap
+	//		gapCount++
+	//	}
 	//}
-
-	// Преобразование всех слов
-	for i, wordsBox := range wordsBoxes {
-		//letterBox := psr.Word(wordsBox)
-		//for _, box := range letterBox {
-		//	dc.SetColor(color.RGBA{255, 0, 0, 255})
-		//	dc.DrawRectangle(float64(box.Box.Min.X), float64(box.Box.Min.Y), float64(box.Box.Dx()), float64(box.Box.Dy()))
-		//	dc.Stroke()
-		//}
-		//fmt.Println(wordsBox)
-
-		dc.SetColor(color.RGBA{0, 255, 0, 255})
-		dc.DrawRectangle(float64(wordsBox.Box.Min.X), float64(wordsBox.Box.Min.Y), float64(wordsBox.Box.Dx()), float64(wordsBox.Box.Dy()))
-		dc.Stroke()
-
-		if i != 0 {
-			fmt.Println("DIFF:", wordsBoxes[i-1].Box.Max.X-wordsBoxes[i].Box.Min.X)
-		}
-	}
-
-	// Сохраняем изображение
-	outFile, _ := os.Create(outPath)
-	defer outFile.Close()
-	png.Encode(outFile, dc.Image())
-
-	fmt.Println("Результат сохранён в", outPath)
+	//
+	//avgGap := 0
+	//if gapCount > 0 {
+	//	avgGap = totalGap / gapCount
+	//}
+	//
+	//// Начальная позиция
+	//cursorX := wordsBoxes[0].Box.Min.X
+	//prevX := wordsBoxes[0].Box.Min.X
+	//for _, word := range wordsBoxes {
+	//	if prevX > word.Box.Min.X {
+	//		cursorX = word.Box.Min.X
+	//	}
+	//
+	//	wordImg := image.NewRGBA(image.Rect(0, 0, word.Box.Dx(), word.Box.Dy()))
+	//	draw.Draw(wordImg, wordImg.Bounds(), img, word.Box.Min, draw.Src)
+	//
+	//	// Копируем слово на новое место
+	//	newDC.DrawImage(wordImg, cursorX, word.Box.Min.Y)
+	//
+	//	// Переход к следующему слову
+	//	cursorX += word.Box.Dx() + avgGap
+	//	prevX = word.Box.Min.X
+	//}
+	//
+	//// Сохраняем новое изображение
+	//outAlignedFile, _ := os.Create("output_aligned.png")
+	//defer outAlignedFile.Close()
+	//png.Encode(outAlignedFile, newDC.Image())
+	//
+	//// Сохраняем изображение
+	//outFile, _ := os.Create(outPath)
+	//defer outFile.Close()
+	//png.Encode(outFile, dc.Image())
+	//
+	//fmt.Println("Результат сохранён в", outPath)
 }
