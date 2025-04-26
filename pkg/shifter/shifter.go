@@ -3,10 +3,14 @@ package shifter
 import (
 	"fmt"
 	"image"
-	"watermarking/cmd/test2/bitset"
+	"watermarking/pkg/bitset"
 )
 
 type Shifter struct{}
+
+func NewShifter() *Shifter {
+	return &Shifter{}
+}
 
 func (sh *Shifter) Normalize(words []image.Rectangle) {
 	var totalGap int

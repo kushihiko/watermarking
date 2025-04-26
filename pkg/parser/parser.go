@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"github.com/otiai10/gosseract/v2"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
 	"image"
 	"math"
-	"os"
 )
 
 type Parser struct {
@@ -20,34 +18,28 @@ type Parser struct {
 	closeFace func()
 }
 
-func NewParser(languages string, level gosseract.PageIteratorLevel, whiteList, blackList string, fontPath string) (*Parser, error) {
-	fontBytes, err := os.ReadFile(fontPath)
-	if err != nil {
-		return nil, err
-	}
-	ft, err := opentype.Parse(fontBytes)
-	if err != nil {
-		return nil, err
-	}
-	face, err := opentype.NewFace(ft, &opentype.FaceOptions{
-		Size:    9,
-		DPI:     300,
-		Hinting: font.HintingFull,
-	})
-	if err != nil {
-		return nil, err
-	}
+func NewParser(languages string, level gosseract.PageIteratorLevel) *Parser {
+	//fontBytes, err := os.ReadFile(fontPath)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//ft, err := opentype.Parse(fontBytes)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//face, err := opentype.NewFace(ft, &opentype.FaceOptions{
+	//	Size:    9,
+	//	DPI:     300,
+	//	Hinting: font.HintingFull,
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	return &Parser{
 		languages: languages,
 		level:     level,
-		face:      face,
-		whiteList: whiteList,
-		blackList: blackList,
-		closeFace: func() {
-			face.Close()
-		},
-	}, nil
+	}
 }
 
 func (p *Parser) Close() {

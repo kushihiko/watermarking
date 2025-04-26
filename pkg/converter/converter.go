@@ -78,4 +78,31 @@ func blobToImage(blob []byte) (image.Image, error) {
 	return img, err
 }
 
-func (c *Converter) ImageToPDF(pngPath string) {}
+func (c *Converter) ImagesToPDF(imagePaths []string, outputPath string) error {
+	finalWand := imagick.NewMagickWand()
+	defer finalWand.Destroy()
+
+	for _, path := range imagePaths {
+		tempWand := imagick.NewMagickWand()
+
+		if err := tempWand.ReadImage(path); err != nil {
+			return err
+		}
+
+		if err := finalWand.AddImage(tempWand); err != nil {
+			return err
+		}
+
+		tempWand.Destroy()
+	}
+
+	if err := finalWand.SetFormat("pdf"); err != nil {
+		return err
+	}
+
+	if err := finalWand.WriteImages(outputPath, true); err != nil {
+		return err
+	}
+
+	return nil
+}

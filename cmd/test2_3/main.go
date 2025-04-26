@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/otiai10/gosseract/v2"
 	"image"
-	"watermarking/cmd/test2/bitset"
-	"watermarking/cmd/test2/bitstuffing"
-	"watermarking/cmd/test2/converter"
-	"watermarking/cmd/test2/painter"
-	"watermarking/cmd/test2/parser"
-	"watermarking/cmd/test2/shifter"
+	"watermarking/pkg/bitset"
+	"watermarking/pkg/bitstuffing"
+	"watermarking/pkg/converter"
+	"watermarking/pkg/painter"
+	"watermarking/pkg/parser"
+	"watermarking/pkg/shifter"
 )
 
 func main() {

@@ -13,4 +13,5 @@ require (
 	golang.org/x/text v0.24.0 // indirect
 	gopkg.in/gographics/imagick.v2 v2.7.0 // indirect
 	gopkg.in/gographics/imagick.v3 v3.7.2 // indirect
+	gopkg.in/yaml.v3 v3.0.1
 )

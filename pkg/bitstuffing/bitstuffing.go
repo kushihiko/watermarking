@@ -3,7 +3,7 @@ package bitstuffing
 import (
 	"errors"
 	"strings"
-	"watermarking/cmd/test2/bitset"
+	"watermarking/pkg/bitset"
 )
 
 type BitStuffing struct {
