@@ -5,6 +5,7 @@ import (
 	"github.com/otiai10/gosseract/v2"
 	"image"
 	"watermarking/cmd/test2/bitset"
+	"watermarking/cmd/test2/bitstuffing"
 	"watermarking/cmd/test2/converter"
 	"watermarking/cmd/test2/painter"
 	"watermarking/cmd/test2/parser"
@@ -85,4 +86,29 @@ func main() {
 			panic(err)
 		}
 	}
+
+	bitstf, err := bitstuffing.NewBitStuffing(5)
+	if err != nil {
+		panic(err)
+	}
+
+	bset, err := bitset.NewBitSetFromString("11111011011111101010111110")
+	if err != nil {
+		panic(err)
+	}
+
+	newBSet, err := bitstf.Encode(bset)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("HAHAHA:     ", bset.String())
+	fmt.Println("HAHAHA:", newBSet.String())
+
+	decodedBSET, err := bitstf.Decode(newBSet)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("HAHAHA:     ", decodedBSET.String())
 }

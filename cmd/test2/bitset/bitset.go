@@ -37,19 +37,26 @@ func NewBitSetFromString(bitsString string) (*BitSet, error) {
 func (b *BitSet) Set(i int) {
 	for i/8 >= len(b.bits) {
 		b.bits = append(b.bits, 0)
+	}
+
+	if i >= b.Len() {
 		b.length = i + 1
 	}
 
-	b.bits[i/8] |= (1 << (i % 8))
+	b.bits[i/8] |= 1 << (i % 8)
 }
 
 func (b *BitSet) Clear(i int) {
-	b.bits[i/8] &^= (1 << (i % 8))
+	b.bits[i/8] &^= 1 << (i % 8)
 }
 
 func (b *BitSet) Get(i int) bool {
-	if i/8 >= len(b.bits) {
-		return false
+	for i/8 >= len(b.bits) {
+		b.bits = append(b.bits, 0)
+	}
+
+	if i >= b.Len() {
+		b.length = i + 1
 	}
 
 	return (b.bits[i/8] & (1 << (i % 8))) != 0
@@ -71,4 +78,12 @@ func (b *BitSet) String() string {
 	}
 
 	return result.String()
+}
+
+func (b *BitSet) Add(x bool) {
+	if x {
+		b.Set(b.Len())
+	} else {
+		b.Get(b.Len())
+	}
 }
