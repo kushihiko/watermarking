@@ -43,6 +43,7 @@ func (sh *Shifter) Normalize(words []image.Rectangle) {
 func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSet) {
 	cursorX := boxes[0].Min.X
 	prevX := boxes[0].Min.X
+	gap := boxes[1].Min.X - boxes[0].Max.X
 
 	bitNumber := 0
 
@@ -64,7 +65,7 @@ func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSe
 			cursorX += shift
 		}
 
-		cursorX += dx + shift
+		cursorX += dx + shift + gap
 		prevX = boxes[i].Min.X
 		bitNumber++
 	}

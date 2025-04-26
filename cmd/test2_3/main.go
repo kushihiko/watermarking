@@ -27,7 +27,7 @@ func main() {
 	}
 
 	prs, err := parser.NewParser(
-		"rus",
+		"rus+eng",
 		gosseract.RIL_WORD,
 		"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя",
 		"-.,:;",
