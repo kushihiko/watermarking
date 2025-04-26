@@ -1,6 +1,7 @@
 package shifter
 
 import (
+	"fmt"
 	"image"
 	"watermarking/cmd/test2/bitset"
 )
@@ -25,17 +26,17 @@ func (sh *Shifter) Normalize(words []image.Rectangle) {
 
 	cursorX := words[0].Min.X
 	prevX := words[0].Min.X
-	for _, word := range words {
-		if prevX > word.Min.X {
-			cursorX = word.Min.X
+	for i := range words {
+		if prevX > words[i].Min.X {
+			cursorX = words[i].Min.X
 		}
 
-		dx := word.Dx()
-		word.Min.X = cursorX
-		word.Max.X = cursorX + dx
+		dx := words[i].Dx()
+		words[i].Min.X = cursorX
+		words[i].Max.X = cursorX + dx
 
 		cursorX += dx + avgGap
-		prevX = word.Min.X
+		prevX = words[i].Min.X
 	}
 }
 
@@ -45,9 +46,9 @@ func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSe
 
 	bitNumber := 0
 
-	for _, word := range boxes {
-		if prevX > word.Min.X {
-			cursorX = word.Min.X
+	for i := range boxes {
+		if prevX > boxes[i].Min.X {
+			cursorX = boxes[i].Min.X
 			bitNumber--
 		}
 
@@ -55,16 +56,16 @@ func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSe
 			bitNumber = 0
 		}
 
-		dx := word.Dx()
-		word.Min.X = cursorX
-		word.Max.X = cursorX + dx
+		dx := boxes[i].Dx()
+		boxes[i].Min.X = cursorX
+		boxes[i].Max.X = cursorX + dx
 
 		if bits.Get(bitNumber) {
 			cursorX += shift
 		}
 
-		cursorX += dx
-		prevX = word.Min.X
+		cursorX += dx + shift
+		prevX = boxes[i].Min.X
 		bitNumber++
 	}
 }
@@ -76,12 +77,16 @@ func (sh *Shifter) Decrypt(boxes []image.Rectangle) (bitset.BitSet, []float64) {
 	}
 
 	var gaps []int
+	mp := make(map[int]int)
 	for i := 1; i < len(boxes); i++ {
 		gap := boxes[i].Min.X - boxes[i-1].Max.X
 		if gap > 0 {
+			mp[gap]++
 			gaps = append(gaps, gap)
 		}
 	}
+
+	fmt.Println("GAPS:", mp)
 
 	if len(gaps) == 0 {
 		return *bitset.NewBitSet(0), nil
