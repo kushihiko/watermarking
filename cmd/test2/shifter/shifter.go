@@ -39,13 +39,13 @@ func (sh *Shifter) Normalize(words []image.Rectangle) {
 	}
 }
 
-func (sh *Shifter) Encrypt(words []image.Rectangle, shift int, bits bitset.BitSet) {
-	cursorX := words[0].Min.X
-	prevX := words[0].Min.X
+func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSet) {
+	cursorX := boxes[0].Min.X
+	prevX := boxes[0].Min.X
 
 	bitNumber := 0
 
-	for _, word := range words {
+	for _, word := range boxes {
 		if prevX > word.Min.X {
 			cursorX = word.Min.X
 			bitNumber--
@@ -65,18 +65,19 @@ func (sh *Shifter) Encrypt(words []image.Rectangle, shift int, bits bitset.BitSe
 
 		cursorX += dx
 		prevX = word.Min.X
+		bitNumber++
 	}
 }
 
 // Generated
-func (sh *Shifter) Decrypt(words []image.Rectangle) (bitset.BitSet, []float64) {
-	if len(words) < 2 {
+func (sh *Shifter) Decrypt(boxes []image.Rectangle) (bitset.BitSet, []float64) {
+	if len(boxes) < 2 {
 		return *bitset.NewBitSet(0), nil
 	}
 
 	var gaps []int
-	for i := 1; i < len(words); i++ {
-		gap := words[i].Min.X - words[i-1].Max.X
+	for i := 1; i < len(boxes); i++ {
+		gap := boxes[i].Min.X - boxes[i-1].Max.X
 		if gap > 0 {
 			gaps = append(gaps, gap)
 		}

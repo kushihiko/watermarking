@@ -1,5 +1,10 @@
 package bitset
 
+import (
+	"errors"
+	"strings"
+)
+
 type BitSet struct {
 	bits   []byte
 	length int
@@ -10,6 +15,23 @@ func NewBitSet(size int) *BitSet {
 		bits:   make([]byte, (size+7)/8),
 		length: size,
 	}
+}
+
+func NewBitSetFromString(bitsString string) (*BitSet, error) {
+	bits := NewBitSet(len(bitsString))
+
+	for i, b := range bitsString {
+		switch b {
+		case '1':
+			bits.Set(i)
+		case '0':
+			continue
+		default:
+			return nil, errors.New("invalid character in bitset")
+		}
+	}
+
+	return bits, nil
 }
 
 func (b *BitSet) Set(i int) {
@@ -35,4 +57,18 @@ func (b *BitSet) Get(i int) bool {
 
 func (b *BitSet) Len() int {
 	return b.length
+}
+
+func (b *BitSet) String() string {
+	var result strings.Builder
+
+	for i := range b.Len() {
+		if b.Get(i) {
+			result.WriteRune('1')
+		} else {
+			result.WriteRune('0')
+		}
+	}
+
+	return result.String()
 }

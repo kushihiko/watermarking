@@ -1,11 +1,11 @@
 package converter
 
 import (
+	"bytes"
 	"fmt"
 	"gopkg.in/gographics/imagick.v3/imagick"
+	"image"
 )
-
-const TmpFolder = "tmp/"
 
 type Converter struct {
 	mw      *imagick.MagickWand
@@ -19,8 +19,8 @@ func NewConverter() *Converter {
 	return &Converter{
 		mw: mw,
 		Destroy: func() {
-			imagick.Terminate()
 			mw.Destroy()
+			imagick.Terminate()
 		},
 	}
 }
@@ -33,32 +33,49 @@ func (c *Converter) AddNoise(noise imagick.NoiseType, offset float64) error {
 	return c.mw.AddNoiseImage(noise, offset)
 }
 
-func (c *Converter) convertPDFToImage(pdfPath string) error {
+func (c *Converter) PDFToImage(pdfPath string) ([]image.Image, error) {
 	if err := c.mw.SetResolution(300, 300); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := c.mw.ReadImage(pdfPath); err != nil {
-		return fmt.Errorf("не удалось прочитать PDF: %w", err)
+		return nil, fmt.Errorf("не удалось прочитать PDF: %w", err)
 	}
 
-	outputPattern := "page-%d.png"
+	var imgs []image.Image
 	numPages := c.mw.GetNumberImages()
 	for i := 0; i < int(numPages); i++ {
 		c.mw.SetIteratorIndex(i)
 
 		page := c.mw.GetImage()
 		if err := page.SetImageFormat("png"); err != nil {
-			return err
+			return imgs, err
 		}
 
-		outPath := fmt.Sprintf(TmpFolder+outputPattern, i)
-		if err := page.WriteImage(outPath); err != nil {
-			return fmt.Errorf("не удалось сохранить %s: %w", outPath, err)
+		blob, err := page.GetImageBlob()
+		if err != nil {
+			return imgs, err
 		}
+		img, err := blobToImage(blob)
+		if err != nil {
+			return imgs, err
+		}
+		imgs = append(imgs, img)
+
+		//outPath := fmt.Sprintf(c.imageFolder+"/"+c.outputPattern, i)
+		//if err := page.WriteImage(outPath); err != nil {
+		//	return uint(i), fmt.Errorf("не удалось сохранить %s: %w", outPath, err)
+		//}
 
 		page.Destroy()
 	}
 
-	return nil
+	return imgs, nil
 }
+
+func blobToImage(blob []byte) (image.Image, error) {
+	img, _, err := image.Decode(bytes.NewReader(blob))
+	return img, err
+}
+
+func (c *Converter) ImageToPDF(pngPath string) {}
