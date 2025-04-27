@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"fmt"
-	"github.com/otiai10/gosseract/v2"
 	"image"
 	"watermarking/internal/config"
 	"watermarking/pkg/bitset"
@@ -10,15 +9,20 @@ import (
 	"watermarking/pkg/converter"
 	"watermarking/pkg/painter"
 	"watermarking/pkg/parser"
+	gocvparser "watermarking/pkg/parser/gocv"
 	"watermarking/pkg/shifter"
 )
 
 type UseCase struct {
 	cfg     *config.Config
 	conv    *converter.Converter
-	prs     *parser.Parser
+	prs     Parser
 	shft    *shifter.Shifter
 	destroy func() error
+}
+
+type Parser interface {
+	Image(imagePath string) ([]parser.BoundingBox, error)
 }
 
 func NewUseCase(cfg *config.Config) UseCase {
@@ -26,10 +30,11 @@ func NewUseCase(cfg *config.Config) UseCase {
 	return UseCase{
 		cfg:  cfg,
 		conv: conv,
-		prs: parser.NewParser(
-			cfg.Language,
-			gosseract.RIL_WORD,
-		),
+		//prs: parser.NewParser(
+		//	cfg.Language,
+		//	gosseract.RIL_TEXTLINE,
+		//),
+		prs:  gocvparser.NewParser(10),
 		shft: shifter.NewShifter(),
 		destroy: func() error {
 			conv.Destroy()
@@ -44,10 +49,10 @@ func (uc *UseCase) Embed(mark uint32) error {
 		return err
 	}
 
-	encodedMark, err := uc.prepareMark(mark)
-	if err != nil {
-		return err
-	}
+	//encodedMark, err := uc.prepareMark(mark)
+	//if err != nil {
+	//	return err
+	//}
 
 	newImagePaths := make([]string, len(imgs))
 	for i := range len(imgs) {
@@ -73,15 +78,17 @@ func (uc *UseCase) Embed(mark uint32) error {
 		for j, wordsBox := range wordsBoxes {
 			newBoxes[j] = wordsBox.Box
 			oldBoxes[j] = wordsBox.Box
-			words[j] = wordsBox.Word
+			words[j] = wordsBox.Text
 		}
 
-		// TODO: fix normilaze: floating letters
 		uc.shft.Normalize(newBoxes)
-		uc.shft.Encrypt(newBoxes, uc.cfg.Shift, *encodedMark)
 
-		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy())
+		// TODO: fix encrypt: floating letters
+		// uc.shft.Encrypt(newBoxes, uc.cfg.Shift, *encodedMark)
+
+		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.cfg.PrintBoxes)
 		newImg, err := pnt.Rearrange(imgs[i], oldBoxes, newBoxes, words)
+		// newImg, err := pnt.DrawBoxes(imgs[i], oldBoxes)
 		if err != nil {
 			return err
 		}
@@ -90,6 +97,10 @@ func (uc *UseCase) Embed(mark uint32) error {
 			return err
 		}
 		newImagePaths[i] = newImagePath
+
+		// test
+		bSetDecr, _ := uc.shft.Decrypt(newBoxes)
+		fmt.Println(bSetDecr.String())
 	}
 
 	err = uc.conv.ImagesToPDF(newImagePaths, uc.cfg.OutputFolder+"/"+uc.cfg.PDFName)
@@ -120,6 +131,7 @@ func (uc *UseCase) prepareMark(mark uint32) (*bitset.BitSet, error) {
 }
 
 func (uc *UseCase) Extract() (mark uint32, err error) {
+
 	return 10, nil
 }
 

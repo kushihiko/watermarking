@@ -12,7 +12,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"watermarking/cmd/test2/tsv"
+	"watermarking/pkg/tsv"
 )
 
 type WordBox struct {
@@ -32,7 +32,7 @@ func main() {
 	// Пути
 	fontPath := "/System/Library/Fonts/Supplemental/Times New Roman.ttf"
 	tsvPath := "/Users/kushihiko/Projects/watermarking/test/output.tsv"
-	imagePath := "/Users/kushihiko/Projects/watermarking/test/2.png"
+	imagePath := "image-0.png"
 	outPath := "output_boxes.png"
 
 	fontSize := 24.0

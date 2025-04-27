@@ -10,6 +10,7 @@ type Config struct {
 	PDFName       string `yaml:"pdf_name"`
 	TmpFolder     string `yaml:"tmp_folder"`
 	OutputFolder  string `yaml:"output_folder"`
+	PrintBoxes    bool   `yaml:"print_boxes"`
 	OutputPattern string `yaml:"output_pattern"`
 	FontPath      string `yaml:"font_path"`
 	Language      string `yaml:"language"`
