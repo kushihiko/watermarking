@@ -12,11 +12,11 @@ func NewShifter() *Shifter {
 	return &Shifter{}
 }
 
-func (sh *Shifter) Normalize(words []image.Rectangle) {
+func (sh *Shifter) Normalize(boxes []image.Rectangle) {
 	var totalGap int
 	var gapCount int
-	for i := 1; i < len(words); i++ {
-		gap := words[i].Min.X - words[i-1].Max.X
+	for i := 1; i < len(boxes); i++ {
+		gap := boxes[i].Min.X - boxes[i-1].Max.X
 		if gap > 0 {
 			totalGap += gap
 			gapCount++
@@ -28,36 +28,36 @@ func (sh *Shifter) Normalize(words []image.Rectangle) {
 		avgGap = totalGap / gapCount
 	}
 
-	cursorX := words[0].Min.X
-	prevX := words[0].Min.X
-	for i := range words {
-		if prevX > words[i].Min.X {
-			cursorX = words[i].Min.X
+	cursorX := boxes[0].Min.X
+	prevMaxY := boxes[0].Max.Y
+	for i := range boxes {
+		if prevMaxY < boxes[i].Min.Y {
+			cursorX = boxes[i].Min.X
 		}
 
-		dx := words[i].Dx()
-		words[i].Min.X = cursorX
-		words[i].Max.X = cursorX + dx
+		dx := boxes[i].Dx()
+		boxes[i].Min.X = cursorX
+		boxes[i].Max.X = cursorX + dx
 
 		cursorX += dx + avgGap
-		prevX = words[i].Min.X
+		prevMaxY = boxes[i].Max.Y
 	}
 }
 
 func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSet) {
 	cursorX := boxes[0].Min.X
-	prevX := boxes[0].Min.X
+	prevMinY := boxes[0].Min.Y
 	gap := boxes[1].Min.X - boxes[0].Max.X
 
 	bitNumber := 0
 
 	for i := range boxes {
-		if prevX > boxes[i].Min.X {
+		if prevMinY < boxes[i].Max.Y {
 			cursorX = boxes[i].Min.X
 			bitNumber--
 		}
 
-		if bitNumber >= bits.Len() {
+		if bitNumber >= bits.Len() || bitNumber < 0 {
 			bitNumber = 0
 		}
 
@@ -70,7 +70,7 @@ func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSe
 		}
 
 		cursorX += dx + shift + gap
-		prevX = boxes[i].Min.X
+		prevMinY = boxes[i].Min.Y
 		bitNumber++
 	}
 }
