@@ -34,7 +34,7 @@ func (c *Converter) AddNoise(noise imagick.NoiseType, offset float64) error {
 }
 
 func (c *Converter) PDFToImage(pdfPath string) ([]image.Image, error) {
-	if err := c.mw.SetResolution(300, 300); err != nil {
+	if err := c.mw.SetResolution(200, 200); err != nil {
 		return nil, err
 	}
 
@@ -48,6 +48,26 @@ func (c *Converter) PDFToImage(pdfPath string) ([]image.Image, error) {
 		c.mw.SetIteratorIndex(i)
 
 		page := c.mw.GetImage()
+		defer page.Destroy()
+
+		width := page.GetImageWidth()
+		height := page.GetImageHeight()
+
+		if width > 2500 || height > 3500 {
+			var coef float64
+			if width > 2500 {
+				coef = 2500.0 / float64(width)
+			} else {
+				coef = 3500.0 / float64(height)
+			}
+			newW := uint(float64(width) * coef)
+			newH := uint(float64(height) * coef)
+
+			if err := page.ResizeImage(newW, newH, imagick.FILTER_LANCZOS); err != nil {
+				return imgs, err
+			}
+		}
+
 		if err := page.SetImageFormat("png"); err != nil {
 			return imgs, err
 		}
@@ -61,13 +81,6 @@ func (c *Converter) PDFToImage(pdfPath string) ([]image.Image, error) {
 			return imgs, err
 		}
 		imgs = append(imgs, img)
-
-		//outPath := fmt.Sprintf(c.imageFolder+"/"+c.outputPattern, i)
-		//if err := page.WriteImage(outPath); err != nil {
-		//	return uint(i), fmt.Errorf("не удалось сохранить %s: %w", outPath, err)
-		//}
-
-		page.Destroy()
 	}
 
 	return imgs, nil

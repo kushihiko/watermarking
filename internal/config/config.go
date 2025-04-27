@@ -6,19 +6,23 @@ import (
 )
 
 type Config struct {
-	PDFPath       string `yaml:"pdf_path"`
-	PDFName       string `yaml:"pdf_name"`
-	TmpFolder     string `yaml:"tmp_folder"`
-	OutputFolder  string `yaml:"output_folder"`
-	PrintBoxes    bool   `yaml:"print_boxes"`
-	OutputPattern string `yaml:"output_pattern"`
-	FontPath      string `yaml:"font_path"`
-	Language      string `yaml:"language"`
-	WhiteList     string `yaml:"whitelist"`
-	BlackList     string `yaml:"blacklist"`
-	Watermark     string `yaml:"watermark"`
-	Shift         int    `yaml:"shift"`
-	MarkerLength  int    `yaml:"marker_length"`
+	TmpFolder     string  `yaml:"tmp_folder"`
+	OutputFolder  string  `yaml:"output_folder"`
+	OutputPattern string  `yaml:"output_pattern"`
+	Embed         Embed   `yaml:"embed"`
+	Extract       Extract `yaml:"extract"`
+}
+
+type Embed struct {
+	PDFSrc       string `yaml:"pdf_src"`
+	PDFDst       string `yaml:"pdf_dst"`
+	PrintBoxes   bool   `yaml:"print_boxes"`
+	Shift        int    `yaml:"shift"`
+	MarkerLength int    `yaml:"marker_length"`
+}
+
+type Extract struct {
+	PDFSrc string `yaml:"pdf_src"`
 }
 
 func NewConfig(path string) (*Config, error) {

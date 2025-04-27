@@ -26,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	if flag.NArg() < 1 {
-		fmt.Println("Использование: watermark_cli [embed|extract] --config=config.yaml --storage=0 --event=0")
+		fmt.Println("Использование: watermark_cli --config=config.yaml --storage=0 --event=0 [embed|extract]")
 		os.Exit(1)
 	}
 	cmd := flag.Arg(0)
@@ -39,15 +39,25 @@ func main() {
 	// TODO: init
 	mark := uint32(eventID)
 
-	useCase := usecase.NewUseCase(cfg)
-	defer useCase.Destroy()
+	useCase, err := usecase.NewUseCase(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		err = useCase.Destroy()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
 	switch cmd {
 	case "embed":
 		err = useCase.Embed(mark)
 	case "extract":
-		fmt.Println("Извлечение водяной метки...")
-		// TODO: реализовать extract
+		_, err := useCase.Extract()
+		if err != nil {
+			log.Fatal(err)
+		}
 	default:
 		fmt.Println("Неизвестная команда. Используйте embed или extract.")
 		os.Exit(1)

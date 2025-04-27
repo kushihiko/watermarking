@@ -18,6 +18,7 @@ type UseCase struct {
 	conv    *converter.Converter
 	prs     Parser
 	shft    *shifter.Shifter
+	bstuff  *bitstuffing.BitStuffing
 	destroy func() error
 }
 
@@ -25,9 +26,14 @@ type Parser interface {
 	Image(imagePath string) ([]parser.BoundingBox, error)
 }
 
-func NewUseCase(cfg *config.Config) UseCase {
+func NewUseCase(cfg *config.Config) (*UseCase, error) {
 	conv := converter.NewConverter()
-	return UseCase{
+	bstuff, err := bitstuffing.NewBitStuffing(cfg.Embed.MarkerLength)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UseCase{
 		cfg:  cfg,
 		conv: conv,
 		//prs: parser.NewParser(
@@ -40,19 +46,20 @@ func NewUseCase(cfg *config.Config) UseCase {
 			conv.Destroy()
 			return nil
 		},
-	}
+		bstuff: bstuff,
+	}, nil
 }
 
 func (uc *UseCase) Embed(mark uint32) error {
-	imgs, err := uc.conv.PDFToImage(uc.cfg.PDFPath)
+	imgs, err := uc.conv.PDFToImage(uc.cfg.Embed.PDFSrc)
 	if err != nil {
 		return err
 	}
 
-	//encodedMark, err := uc.prepareMark(mark)
-	//if err != nil {
-	//	return err
-	//}
+	encodedMark, err := uc.bstuff.PrepareMark(mark)
+	if err != nil {
+		return err
+	}
 
 	newImagePaths := make([]string, len(imgs))
 	for i := range len(imgs) {
@@ -82,11 +89,9 @@ func (uc *UseCase) Embed(mark uint32) error {
 		}
 
 		uc.shft.Normalize(newBoxes)
+		uc.shft.Encrypt(newBoxes, uc.cfg.Embed.Shift, *encodedMark)
 
-		// TODO: fix encrypt: floating letters
-		// uc.shft.Encrypt(newBoxes, uc.cfg.Shift, *encodedMark)
-
-		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.cfg.PrintBoxes)
+		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.cfg.Embed.PrintBoxes)
 		newImg, err := pnt.Rearrange(imgs[i], oldBoxes, newBoxes, words)
 		// newImg, err := pnt.DrawBoxes(imgs[i], oldBoxes)
 		if err != nil {
@@ -99,11 +104,11 @@ func (uc *UseCase) Embed(mark uint32) error {
 		newImagePaths[i] = newImagePath
 
 		// test
-		bSetDecr, _ := uc.shft.Decrypt(newBoxes)
-		fmt.Println(bSetDecr.String())
+		//bSetDecr, _ := uc.shft.Decrypt(newBoxes)
+		//fmt.Println(bSetDecr.String())
 	}
 
-	err = uc.conv.ImagesToPDF(newImagePaths, uc.cfg.OutputFolder+"/"+uc.cfg.PDFName)
+	err = uc.conv.ImagesToPDF(newImagePaths, uc.cfg.Embed.PDFDst)
 	if err != nil {
 		return err
 	}
@@ -111,26 +116,57 @@ func (uc *UseCase) Embed(mark uint32) error {
 	return nil
 }
 
-func (uc *UseCase) prepareMark(mark uint32) (*bitset.BitSet, error) {
-	bitstf, err := bitstuffing.NewBitStuffing(uc.cfg.MarkerLength)
+func (uc *UseCase) Extract() (marker uint32, err error) {
+	imgs, err := uc.conv.PDFToImage(uc.cfg.Extract.PDFSrc)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	bset, err := bitset.NewBitSetFromString(fmt.Sprintf("%b", mark))
-	if err != nil {
-		return nil, err
+	dectipted := make([]bitset.BitSet, len(imgs))
+	for i := range len(imgs) {
+		imagePath := fmt.Sprintf(uc.cfg.TmpFolder+"/"+uc.cfg.OutputPattern, i)
+		newImagePath := fmt.Sprintf(uc.cfg.TmpFolder+"/newImages/"+uc.cfg.OutputPattern, i)
+
+		if err = painter.SaveImage(imgs[i], imagePath); err != nil {
+			return 0, err
+		}
+
+		wordsBoxes, err := uc.prs.Image(imagePath)
+		if err != nil {
+			return 0, err
+		}
+
+		//if err = painter.DeleteImage(imagePath); err != nil {
+		//	return 0, err
+		//}
+
+		boxes := make([]image.Rectangle, len(wordsBoxes))
+		for j := range wordsBoxes {
+			boxes[j] = wordsBoxes[j].Box
+		}
+
+		// debug
+		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.cfg.Embed.PrintBoxes)
+		newImg, err := pnt.DrawBoxes(imgs[i], boxes)
+		if err != nil {
+			return 0, err
+		}
+		err = painter.SaveImage(newImg, newImagePath)
+		if err != nil {
+			return 0, err
+		}
+
+		bSetDecr, _ := uc.shft.Decrypt(boxes)
+		dectipted[i] = bSetDecr
 	}
 
-	encodedBSet, err := bitstf.Encode(bset)
+	recoveredMark := uc.bstuff.RecoverRecords(dectipted)
+	mark, err := uc.bstuff.Decode(recoveredMark)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	return encodedBSet, nil
-}
-
-func (uc *UseCase) Extract() (mark uint32, err error) {
+	fmt.Println(mark.String())
 
 	return 10, nil
 }

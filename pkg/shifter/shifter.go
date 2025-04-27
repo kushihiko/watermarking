@@ -1,7 +1,6 @@
 package shifter
 
 import (
-	"fmt"
 	"image"
 	"watermarking/pkg/bitset"
 )
@@ -46,13 +45,13 @@ func (sh *Shifter) Normalize(boxes []image.Rectangle) {
 
 func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSet) {
 	cursorX := boxes[0].Min.X
-	prevMinY := boxes[0].Min.Y
+	prevMaxY := boxes[0].Max.Y
 	gap := boxes[1].Min.X - boxes[0].Max.X
 
 	bitNumber := 0
 
 	for i := range boxes {
-		if prevMinY < boxes[i].Max.Y {
+		if prevMaxY < boxes[i].Min.Y {
 			cursorX = boxes[i].Min.X
 			bitNumber--
 		}
@@ -70,7 +69,7 @@ func (sh *Shifter) Encrypt(boxes []image.Rectangle, shift int, bits bitset.BitSe
 		}
 
 		cursorX += dx + shift + gap
-		prevMinY = boxes[i].Min.Y
+		prevMaxY = boxes[i].Max.Y
 		bitNumber++
 	}
 }
@@ -90,8 +89,6 @@ func (sh *Shifter) Decrypt(boxes []image.Rectangle) (bitset.BitSet, []float64) {
 			gaps = append(gaps, gap)
 		}
 	}
-
-	fmt.Println("GAPS:", mp)
 
 	if len(gaps) == 0 {
 		return *bitset.NewBitSet(0), nil

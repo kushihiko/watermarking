@@ -2,10 +2,8 @@ package gocvparser
 
 import (
 	"errors"
-	"fmt"
 	"gocv.io/x/gocv"
 	"image"
-	"image/color"
 	"sort"
 	"watermarking/pkg/parser"
 )
@@ -40,19 +38,23 @@ func (p *Parser) Image(imagePath string) ([]parser.BoundingBox, error) {
 	contours := gocv.FindContours(bin, gocv.RetrievalExternal, gocv.ChainApproxSimple)
 
 	var chars []image.Rectangle
+	var avgDx, avgDy int
 	for i := 0; i < contours.Size(); i++ {
 		rect := gocv.BoundingRect(contours.At(i))
 		area := rect.Dx() * rect.Dy()
 		if area < p.minArea {
 			continue
 		}
+		avgDx += rect.Bounds().Dx()
+		avgDy += rect.Bounds().Dy()
 		chars = append(chars, rect)
 	}
+	avgDx /= len(chars)
+	avgDy /= len(chars)
 
-	const maxXGap = 10 // допустимый зазор между символами по X
-	const maxYGap = 40 // допустимый зазор между символами по Y (по одной строке)
+	maxXGap := int(float64(avgDx) / 2.3)
+	maxYGap := avgDy * 2
 
-	// Сортируем слева направо и сверху вниз
 	sort.Slice(chars, func(i, j int) bool {
 		if abs(chars[i].Min.Y-chars[j].Min.Y) > maxYGap {
 			return chars[i].Min.Y < chars[j].Min.Y
@@ -60,18 +62,17 @@ func (p *Parser) Image(imagePath string) ([]parser.BoundingBox, error) {
 		return chars[i].Min.X < chars[j].Min.X
 	})
 
-	// Проверка сортировки
-	debugImg := img.Clone()
-	defer debugImg.Close()
-
-	for i, r := range chars {
-		gocv.Rectangle(&debugImg, r, color.RGBA{0, 255, 0, 0}, 2)
-
-		pt := image.Pt(r.Min.X, r.Min.Y-5)
-		gocv.PutText(&debugImg, fmt.Sprintf("%d", i), pt, gocv.FontHersheySimplex, 0.5, color.RGBA{255, 0, 0, 0}, 1)
-	}
-
-	gocv.IMWrite("debug_output.png", debugImg)
+	//debugImg := img.Clone()
+	//defer debugImg.Close()
+	//
+	//for i, r := range chars {
+	//	gocv.Rectangle(&debugImg, r, color.RGBA{0, 255, 0, 0}, 2)
+	//
+	//	pt := image.Pt(r.Min.X, r.Min.Y-5)
+	//	gocv.PutText(&debugImg, fmt.Sprintf("%d", i), pt, gocv.FontHersheySimplex, 0.3, color.RGBA{255, 0, 0, 0}, 1)
+	//}
+	//
+	//gocv.IMWrite("debug_output.png", debugImg)
 
 	var boxes []parser.BoundingBox
 	var currentBox *image.Rectangle
