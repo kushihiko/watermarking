@@ -8,29 +8,32 @@ import (
 )
 
 type Converter struct {
-	mw      *imagick.MagickWand
-	Destroy func()
+	mw                                    *imagick.MagickWand
+	gaussianBlurRadius, gaussianBlurSigma float64
+	noise                                 imagick.NoiseType
+	noiceOffset                           float64
+	destroy                               func()
 }
 
-func NewConverter() *Converter {
+func NewConverter(gaussianBlurRadius, gaussianBlurSigma float64, noise imagick.NoiseType, noiceOffset float64) *Converter {
 	imagick.Initialize()
 	mw := imagick.NewMagickWand()
 
 	return &Converter{
-		mw: mw,
-		Destroy: func() {
+		mw:                 mw,
+		gaussianBlurRadius: gaussianBlurRadius,
+		gaussianBlurSigma:  gaussianBlurSigma,
+		noise:              noise,
+		noiceOffset:        noiceOffset,
+		destroy: func() {
 			mw.Destroy()
 			imagick.Terminate()
 		},
 	}
 }
 
-func (c *Converter) SetGaussianBlur(radius, sigma float64) error {
-	return c.mw.GaussianBlurImage(radius, sigma)
-}
-
-func (c *Converter) AddNoise(noise imagick.NoiseType, offset float64) error {
-	return c.mw.AddNoiseImage(noise, offset)
+func (c *Converter) Clear() {
+	c.mw.Clear()
 }
 
 func (c *Converter) PDFToImage(pdfPath string) ([]image.Image, error) {
@@ -109,6 +112,15 @@ func (c *Converter) ImagesToPDF(imagePaths []string, outputPath string) error {
 		tempWand.Destroy()
 	}
 
+	err := finalWand.GaussianBlurImage(c.gaussianBlurRadius, c.gaussianBlurSigma)
+	if err != nil {
+		return err
+	}
+	err = finalWand.AddNoiseImage(c.noise, c.noiceOffset)
+	if err != nil {
+		return err
+	}
+
 	if err := finalWand.SetFormat("pdf"); err != nil {
 		return err
 	}
@@ -117,5 +129,10 @@ func (c *Converter) ImagesToPDF(imagePaths []string, outputPath string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (c *Converter) Destroy() error {
+	c.destroy()
 	return nil
 }

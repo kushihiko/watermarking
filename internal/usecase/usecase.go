@@ -3,55 +3,65 @@ package usecase
 import (
 	"fmt"
 	"image"
-	"watermarking/internal/config"
+	"strconv"
 	"watermarking/pkg/bitset"
-	"watermarking/pkg/bitstuffing"
-	"watermarking/pkg/converter"
 	"watermarking/pkg/painter"
 	"watermarking/pkg/parser"
-	gocvparser "watermarking/pkg/parser/gocv"
-	"watermarking/pkg/shifter"
 )
 
 type UseCase struct {
-	cfg     *config.Config
-	conv    *converter.Converter
-	prs     Parser
-	shft    *shifter.Shifter
-	bstuff  *bitstuffing.BitStuffing
-	destroy func() error
+	conv                                                              Converter
+	prs                                                               Parser
+	shft                                                              Shifter
+	bstuff                                                            BitStuffing
+	destroy                                                           func() error
+	embedPDFSrc, embedPDFDst, extractPDFDst, outputPattern, tmpFolder string
+	printBoxes                                                        bool
 }
 
 type Parser interface {
 	Image(imagePath string) ([]parser.BoundingBox, error)
 }
 
-func NewUseCase(cfg *config.Config) (*UseCase, error) {
-	conv := converter.NewConverter()
-	bstuff, err := bitstuffing.NewBitStuffing(cfg.Embed.MarkerLength)
-	if err != nil {
-		return nil, err
-	}
+type Shifter interface {
+	Normalize(boxes []image.Rectangle)
+	Encrypt(boxes []image.Rectangle, bits bitset.BitSet)
+	Decrypt(boxes []image.Rectangle) (bitset.BitSet, []float64)
+}
 
+type BitStuffing interface {
+	PrepareMark(mark uint32) (*bitset.BitSet, error)
+	Encode(set *bitset.BitSet) (*bitset.BitSet, error)
+	RecoverRecords(detected []bitset.BitSet) *bitset.BitSet
+	Decode(bset *bitset.BitSet) (*bitset.BitSet, error)
+}
+
+type Converter interface {
+	PDFToImage(pdfPath string) ([]image.Image, error)
+	ImagesToPDF(imagePaths []string, outputPath string) error
+	Destroy() error
+}
+
+func NewUseCase(shft Shifter, bstuff BitStuffing, prs Parser, conv Converter, embedPDFSrc, embedPDFDst, extractPDFDst, outputPattern, tmpFolder string, printBoxes bool) (*UseCase, error) {
 	return &UseCase{
-		cfg:  cfg,
 		conv: conv,
-		//prs: parser.NewParser(
-		//	cfg.Language,
-		//	gosseract.RIL_TEXTLINE,
-		//),
-		prs:  gocvparser.NewParser(10),
-		shft: shifter.NewShifter(),
+		prs:  prs,
+		shft: shft,
 		destroy: func() error {
-			conv.Destroy()
-			return nil
+			return conv.Destroy()
 		},
-		bstuff: bstuff,
+		bstuff:        bstuff,
+		embedPDFSrc:   embedPDFSrc,
+		embedPDFDst:   embedPDFDst,
+		extractPDFDst: extractPDFDst,
+		outputPattern: outputPattern,
+		tmpFolder:     tmpFolder,
+		printBoxes:    printBoxes,
 	}, nil
 }
 
 func (uc *UseCase) Embed(mark uint32) error {
-	imgs, err := uc.conv.PDFToImage(uc.cfg.Embed.PDFSrc)
+	imgs, err := uc.conv.PDFToImage(uc.embedPDFSrc)
 	if err != nil {
 		return err
 	}
@@ -63,8 +73,8 @@ func (uc *UseCase) Embed(mark uint32) error {
 
 	newImagePaths := make([]string, len(imgs))
 	for i := range len(imgs) {
-		imagePath := fmt.Sprintf(uc.cfg.TmpFolder+"/"+uc.cfg.OutputPattern, i)
-		newImagePath := fmt.Sprintf(uc.cfg.TmpFolder+"/newImages/"+uc.cfg.OutputPattern, i)
+		imagePath := fmt.Sprintf(uc.tmpFolder+"/"+uc.outputPattern, i)
+		newImagePath := fmt.Sprintf(uc.tmpFolder+"/newImages/"+uc.outputPattern, i)
 
 		if err = painter.SaveImage(imgs[i], imagePath); err != nil {
 			return err
@@ -89,26 +99,23 @@ func (uc *UseCase) Embed(mark uint32) error {
 		}
 
 		uc.shft.Normalize(newBoxes)
-		uc.shft.Encrypt(newBoxes, uc.cfg.Embed.Shift, *encodedMark)
+		uc.shft.Encrypt(newBoxes, *encodedMark)
 
-		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.cfg.Embed.PrintBoxes)
+		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.printBoxes)
 		newImg, err := pnt.Rearrange(imgs[i], oldBoxes, newBoxes, words)
 		// newImg, err := pnt.DrawBoxes(imgs[i], oldBoxes)
 		if err != nil {
 			return err
 		}
+
 		err = painter.SaveImage(newImg, newImagePath)
 		if err != nil {
 			return err
 		}
 		newImagePaths[i] = newImagePath
-
-		// test
-		//bSetDecr, _ := uc.shft.Decrypt(newBoxes)
-		//fmt.Println(bSetDecr.String())
 	}
 
-	err = uc.conv.ImagesToPDF(newImagePaths, uc.cfg.Embed.PDFDst)
+	err = uc.conv.ImagesToPDF(newImagePaths, uc.extractPDFDst)
 	if err != nil {
 		return err
 	}
@@ -117,15 +124,15 @@ func (uc *UseCase) Embed(mark uint32) error {
 }
 
 func (uc *UseCase) Extract() (marker uint32, err error) {
-	imgs, err := uc.conv.PDFToImage(uc.cfg.Extract.PDFSrc)
+	imgs, err := uc.conv.PDFToImage(uc.extractPDFDst)
 	if err != nil {
 		return 0, err
 	}
 
 	dectipted := make([]bitset.BitSet, len(imgs))
 	for i := range len(imgs) {
-		imagePath := fmt.Sprintf(uc.cfg.TmpFolder+"/"+uc.cfg.OutputPattern, i)
-		newImagePath := fmt.Sprintf(uc.cfg.TmpFolder+"/newImages/"+uc.cfg.OutputPattern, i)
+		imagePath := fmt.Sprintf(uc.tmpFolder+"/"+uc.outputPattern, i)
+		newImagePath := fmt.Sprintf(uc.tmpFolder+"/newImages/"+uc.outputPattern, i)
 
 		if err = painter.SaveImage(imgs[i], imagePath); err != nil {
 			return 0, err
@@ -146,7 +153,7 @@ func (uc *UseCase) Extract() (marker uint32, err error) {
 		}
 
 		// debug
-		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.cfg.Embed.PrintBoxes)
+		pnt := painter.NewPainter(imgs[i].Bounds().Dx(), imgs[i].Bounds().Dy(), uc.printBoxes)
 		newImg, err := pnt.DrawBoxes(imgs[i], boxes)
 		if err != nil {
 			return 0, err
@@ -166,9 +173,13 @@ func (uc *UseCase) Extract() (marker uint32, err error) {
 		return 0, err
 	}
 
-	fmt.Println(mark.String())
+	value, err := strconv.ParseUint(mark.String(), 2, 32) // база 2 (двоичная), 32 бита
+	if err != nil {
+		// return 0, err
+		return 0, nil
+	}
 
-	return 10, nil
+	return uint32(value), nil
 }
 
 func (uc *UseCase) Destroy() error {

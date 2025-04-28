@@ -7,6 +7,10 @@ import (
 	"os"
 	"watermarking/internal/config"
 	"watermarking/internal/usecase"
+	"watermarking/pkg/bitstuffing"
+	"watermarking/pkg/converter"
+	gocvparser "watermarking/pkg/parser/gocv"
+	"watermarking/pkg/shifter"
 )
 
 type UseCase interface {
@@ -39,7 +43,15 @@ func main() {
 	// TODO: init
 	mark := uint32(eventID)
 
-	useCase, err := usecase.NewUseCase(cfg)
+	shft := shifter.NewShifter(cfg.Embed.Shift)
+	bstuff, err := bitstuffing.NewBitStuffing(cfg.Embed.MarkerLength)
+	if err != nil {
+		log.Fatal(err)
+	}
+	prs := gocvparser.NewParser(10)
+	conv := converter.NewConverter(0, 0, 0, 0)
+
+	useCase, err := usecase.NewUseCase(shft, bstuff, prs, conv, cfg.Embed.PDFSrc, cfg.Embed.PDFDst, cfg.Extract.PDFSrc, cfg.OutputPattern, cfg.TmpFolder, cfg.Embed.PrintBoxes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,11 +65,15 @@ func main() {
 	switch cmd {
 	case "embed":
 		err = useCase.Embed(mark)
-	case "extract":
-		_, err := useCase.Extract()
 		if err != nil {
 			log.Fatal(err)
 		}
+	case "extract":
+		mark, err := useCase.Extract()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(mark)
 	default:
 		fmt.Println("Неизвестная команда. Используйте embed или extract.")
 		os.Exit(1)

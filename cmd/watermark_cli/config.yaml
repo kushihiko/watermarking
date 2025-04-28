@@ -1,12 +1,12 @@
 embed:
   pdf_src: "test.pdf"
-  pdf_dst: "test_with_watermarking.pdf"
+  pdf_dst: "doc_with_watermarking.pdf"
   print_boxes: false
   shift: 4
   marker_length: 8
 
 extract:
-  pdf_src: "test_with_watermarking.pdf"
+  pdf_src: "doc_with_watermarking.pdf"
 
 tmp_folder: "tmp/"
 output_pattern: "image-%d.png"

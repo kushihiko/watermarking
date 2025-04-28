@@ -52,8 +52,8 @@ func (p *Parser) Image(imagePath string) ([]parser.BoundingBox, error) {
 	avgDx /= len(chars)
 	avgDy /= len(chars)
 
-	maxXGap := int(float64(avgDx) / 2.3)
-	maxYGap := avgDy * 2
+	maxXGap := int(float64(avgDx) / 2.1)
+	maxYGap := int(float64(avgDx) * 1.6)
 
 	sort.Slice(chars, func(i, j int) bool {
 		if abs(chars[i].Min.Y-chars[j].Min.Y) > maxYGap {
@@ -62,6 +62,7 @@ func (p *Parser) Image(imagePath string) ([]parser.BoundingBox, error) {
 		return chars[i].Min.X < chars[j].Min.X
 	})
 
+	// debug
 	//debugImg := img.Clone()
 	//defer debugImg.Close()
 	//
